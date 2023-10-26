@@ -1,52 +1,37 @@
-var txr = [];
+const processTransactions = (transactions) => {
+  if (!validateTransactions(transactions)) {
+    throw new Error("Undefined collection of transactions");
+  }
 
-function processTransactions(transActions) {
+  return convertArrOfArraysToArrayOfStrings(
+    sortByTransactionCountThenBySalesItem(
+      convertObjToArr(convertArrToObjWithTransactionsCountValue(transactions))
+    )
+  );
+};
 
-    txr = [];
+const validateTransactions = (transactions) => {
+  return transactions !== undefined;
+};
 
-    if(!validateTransactions(transActions)) {
-        throw new Error("Undefined collection of transactions")
-    }
+const convertArrToObjWithTransactionsCountValue = (transactions) => {
+  return transactions.reduce((obj, transaction) => {
+    obj[transaction] = (obj[transaction] || 0) + 1;
+    return obj;
+  }, {});
+};
 
-    let txCount = {}
+const convertObjToArr = (arr) => {
+  return Object.entries(arr);
+};
 
-    const numberOfTransactions = transActions.length;
+const sortByTransactionCountThenBySalesItem = (arr) =>
+  arr.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 
-    for(var i = 0; i < numberOfTransactions; i++) {
-        const transaction = transActions[i];
-        txCount[transaction] ? txCount[transaction] += 1 : txCount[transaction] = 1;
-    }
-
-    txCount = sortByAmountThenName(txCount);
-    
-    // Place them back in array for returning
-    Object.keys(txCount).forEach(function (key, index) {
-        txr[index] = `${key} ${txCount[key]}`;
-    });
-
-    return txr;
-}
-
-function sortByAmountThenName(txCount) {
-    let sortedKeys = Object.keys(txCount).sort(function sortingFunction(itemOne, itemTwo) {
-        return  txCount[itemTwo] - txCount[itemOne] || itemOne > itemTwo || -(itemOne < itemTwo)}
-    );
-
-    let sortedResults = {};
-    for(let objectKey of sortedKeys) {
-        sortedResults[objectKey] = txCount[objectKey];
-    }
-
-    return sortedResults;
-}
-
-
-function validateTransactions(transactions) {
-    if(transactions === undefined) {
-        return false;
-    } 
-
-    return true;
-}
+const convertArrOfArraysToArrayOfStrings = (transactions) => {
+  return transactions.map((transaction) => {
+    return `${transaction[0]} ${transaction[1]}`;
+  });
+};
 
 module.exports = processTransactions;
